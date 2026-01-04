@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motivational Msg App</title>
+  <style>
+    /* NEW: Animation for the quote card */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ---- Global & Background Animation ---- */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      /* NEW: Light, warm autumn-themed gradient */
+      background: linear-gradient(-45deg, #ffcc99, #fff3b0, #f69d3c);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: #443027; /* NEW: Dark brown text for readability */
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ---- Typography ---- */
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); /* Lighter shadow */
+      margin-bottom: 2rem;
+    }
+
+    /* ---- The "Get Message" Button ---- */
+    /* Styling your input[type="submit"] */
+    input[type="submit"] {
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 15px 30px;
+      background: #e88a44; /* NEW: Warm orange color */
+      color: #fff; /* White text */
+      border: none;
+      border-radius: 30px; /* NEW: Curved shape */
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      -webkit-appearance: none; /* Fix for iOS styling */
+    }
+
+    input[type="submit"]:hover {
+      background: #ffad73; /* Lighter orange on hover */
+      box-shadow: 0 6px 20px rgba(100, 50, 0, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* ---- The "Quote Card" Container ---- */
+    /* NEW: A wrapper for your two h2 tags */
+    .quote-container {
+      width: 100%;
+      max-width: 600px;
+      margin-top: 2.5rem;
+      padding: 2.5rem;
+      /* NEW: Light, semi-transparent beige */
+      background: rgba(255, 250, 240, 0.4); 
+      border: 1px solid rgba(128, 70, 0, 0.2); /* Light brown border */
+      border-radius: 25px; /* NEW: Curved shape */
+      backdrop-filter: blur(10px); /* Frosted glass effect */
+      box-shadow: 0 8px 32px 0 rgba(100, 50, 0, 0.1);
+      
+      /* Hide until first quote is loaded */
+      opacity: 0;
+      display: none; 
+      transition: opacity 0.5s ease;
+    }
+    
+    /* NEW: Animation class to be added by JS */
+    .quote-container.visible {
+      display: block;
+      opacity: 1; /* Make it visible */
+      animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    /* Styling your #quote h2 */
+    #quote {
+      font-size: 1.75rem;
+      font-style: italic;
+      font-weight: 300;
+      line-height: 1.5;
+      margin: 0 0 1.5rem 0;
+      /* Removed old border styles */
+    }
+    
+    /* Styling your #author h2 */
+    #author {
+      font-size: 1rem;
+      font-weight: 500;
+      text-align: right;
+      color: #794d2c; /* Darker brown for the author */
+      margin: 0;
+      /* Removed old border styles */
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Motivational Msg App</h1>
+
+  <form onsubmit="gm()">
+    <input type="submit" value="Get New Message" />
+  </form>
+
+  <!-- 
+    NEW: I've wrapped your two h2 tags in a single "quote-container"
+    This allows us to style it as one beautiful, curved card.
+  -->
+  <div class="quote-container" id="quote-card">
+    <h2 id="quote">Your quote will appear here...</h2>
+    <h2 id="author"></h2>
+  </div>
+
+  <script>
+    function gm() {
+      event.preventDefault();
+      
+      // **FIXED ERROR**: Changed "getElementByld" to "getElementById"
+      let quote = document.getElementById("quote");
+      let author = document.getElementById("author");
+      
+      // NEW: Get the card to animate it
+      let quoteCard = document.getElementById("quote-card");
+      
+      // NEW: Remove animation class to allow it to replay
+      quoteCard.classList.remove("visible");
+      
+      // Optional: Show loading state
+      quote.innerHTML = "Fetching wisdom...";
+      author.innerHTML = "";
+
+      let url = "https://quotes-api-self.vercel.app/quote";
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          // Force browser to "reflow" to replay animation
+          void quoteCard.offsetWidth; 
+
+          // Update text
+          quote.innerHTML = `"${data.quote}"`; // Added quotes
+          author.innerHTML = `— ${data.author}`; // Added dash
+          
+          // NEW: Add class to trigger animation
+          quoteCard.classList.add("visible");
+        })
+        .catch(err => {
+          // **IMPROVEMENT**: Removed alert()
+          console.error(err); // Log error for developer
+          quote.innerHTML = "Sorry, couldn't fetch a quote. Please try again.";
+          author.innerHTML = "";
+          // NEW: Still show the card, even for an error
+          quoteCard.classList.add("visible");
+        });
+    }
+  </script>
+
+</body>
+</html>
